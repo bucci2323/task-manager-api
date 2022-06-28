@@ -2,17 +2,35 @@ const express = require('express')
 const Task = require('../models/task')
 const auth = require('../middleware/auth')
 const router = new express.Router()
+const Joi = require('joi')
+
+const taskSchema = Joi.object().keys({
+    description:Joi.string().required(),
+    completed : Joi.boolean()
+})
+
 
 router.post('/tasks', auth , async (req, res) => {
 
+    try {
+        
+    
+    const { error, value } = taskSchema.validate( req.body  );
+
+
+    if(error){
+        throw new Error(error.details[0].message)
+    }
+
     const task = new Task({
-        ...req.body,
+     ...value,
         owner: req.user._id
     })
-    try {
+  
         await task.save()
         res.status(201).send(task)
     } catch (e) {
+        console.log(e)
         res.status(400).send(e)
     }
 
