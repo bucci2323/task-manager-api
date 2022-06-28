@@ -6,9 +6,9 @@ const Task = require('../../src/models/task')
 const userOneId = new mongoose.Types.ObjectId()
 const userOne = {
     _id: userOneId,
-    name: 'Mike',
-    email: 'mike@example.com',
-    password: '56what!!',
+    name: 'victor',
+    email: 'victormartins@example.com',
+    password: 'MyPass477!',
     tokens: [{
         token: jwt.sign({ _id: userOneId }, process.env.JWT_SECRET)
     }]

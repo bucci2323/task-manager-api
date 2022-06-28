@@ -5,28 +5,24 @@ const router = new express.Router()
 const Joi = require('joi')
 
 const taskSchema = Joi.object().keys({
-    description:Joi.string().required(),
-    completed : Joi.boolean()
+    description: Joi.string().required(),
+    completed: Joi.boolean()
 })
 
-
-router.post('/tasks', auth , async (req, res) => {
+router.post('/tasks', auth, async (req, res) => {
 
     try {
-        
-    
-    const { error, value } = taskSchema.validate( req.body  );
+        const { error, value } = taskSchema.validate(req.body);
 
+        if (error) {
+            throw new Error(error.details[0].message)
+        }
 
-    if(error){
-        throw new Error(error.details[0].message)
-    }
+        const task = new Task({
+            ...value,
+            owner: req.user._id
+        })
 
-    const task = new Task({
-     ...value,
-        owner: req.user._id
-    })
-  
         await task.save()
         res.status(201).send(task)
     } catch (e) {
@@ -38,16 +34,16 @@ router.post('/tasks', auth , async (req, res) => {
 // GET /tasks?completed=false
 // GET/tasks?limit=10&skip=0
 // GET/tasks?sortBy=createdAt_asc
-router.get('/tasks', auth,  async (req, res) => {
-   const match = {}
-   const sort = {}
-    if(req.query.completed){
+router.get('/tasks', auth, async (req, res) => {
+    const match = {}
+    const sort = {}
+    if (req.query.completed) {
         match.completed = req.query.completed === 'true'
     }
 
-    if(req.query.sortBy){
-  const parts = req.query.sortBy.split(':')
-  sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
     }
 
     try {
@@ -57,7 +53,7 @@ router.get('/tasks', auth,  async (req, res) => {
             match,
             options: {
                 limit: parseInt(req.query.limit),
-                skip :parseInt(req.query.skip),
+                skip: parseInt(req.query.skip),
                 sort
             }
         })
@@ -68,12 +64,11 @@ router.get('/tasks', auth,  async (req, res) => {
 
 })
 
-
-router.get('/tasks/:id', auth,  async (req, res) => {
+router.get('/tasks/:id', auth, async (req, res) => {
     const _id = req.params.id
 
     try {
-        const task = await Task.findOne({ _id , owner : req.user._id})
+        const task = await Task.findOne({ _id, owner: req.user._id })
         if (!task) {
             return res.status(404).send()
         }
@@ -84,9 +79,7 @@ router.get('/tasks/:id', auth,  async (req, res) => {
 
 })
 
-
-
-router.patch('/tasks/:id', auth,  async (req, res) => {
+router.patch('/tasks/:id', auth, async (req, res) => {
     const updates = Object.keys(req.body)
     allowedUpdates = ['description', 'completed']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
@@ -95,7 +88,7 @@ router.patch('/tasks/:id', auth,  async (req, res) => {
         res.status(400).send({ error: "Invalid updates" })
     }
     try {
-        const task = await Task.findOne({_id:req.params._id , owner:req.user._id})
+        const task = await Task.findOne({ _id: req.params._id, owner: req.user._id })
 
         if (!task) {
             return res.status(404).send()
@@ -110,9 +103,9 @@ router.patch('/tasks/:id', auth,  async (req, res) => {
 })
 
 
-router.delete('/tasks/:id', auth,  async  (req, res) => {
+router.delete('/tasks/:id', auth, async (req, res) => {
     try {
-        const task = await Task.findOneAndDelete({_id: req.params.id, owner: req.user._id})
+        const task = await Task.findOneAndDelete({ _id: req.params.id, owner: req.user._id })
         if (!task) {
             return res.status(404).send()
         }
@@ -121,7 +114,5 @@ router.delete('/tasks/:id', auth,  async  (req, res) => {
         res.status(500).send(e)
     }
 })
-
-
 
 module.exports = router

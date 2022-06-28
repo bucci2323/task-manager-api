@@ -5,18 +5,10 @@ const sharp = require('sharp')
 const auth = require('../middleware/auth')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
-
-
-const { sendWelcomeEmail, sendCancelationEmail } = require('../emails/account')
-
-const router = new express.Router()
 const User = require('../models/user')
 
-
-
-
-
-
+const { sendWelcomeEmail, sendCancelationEmail } = require('../emails/account')
+const router = new express.Router()
 
 router.post('/users', async (req, res) => {
     const user = new User(req.body)
@@ -29,7 +21,7 @@ router.post('/users', async (req, res) => {
     } catch (e) {
         console.log('err is ', e);
         res.status(400).send(e)
-        
+
     }
 })
 
@@ -39,7 +31,7 @@ router.post('/users/login', async (req, res) => {
         const token = await user.generateAuthToken()
         res.send({ user, token })
     } catch (e) {
-       console.log(e);
+        console.log(e);
         res.status(400).send(e)
     }
 
@@ -69,11 +61,9 @@ router.post('/users/logoutAll', auth, async (req, res) => {
     }
 })
 
-
 router.get('/users/me', auth, async (req, res) => {
     res.send(req.user)
 })
-
 
 router.patch('/users/me', auth, async (req, res) => {
     const updates = Object.keys(req.body)

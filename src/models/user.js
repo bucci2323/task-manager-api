@@ -71,8 +71,6 @@ userSchema.methods.generateAuthToken = async function () {
     return token
 }
 
-
-
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({ email });
 
@@ -95,7 +93,6 @@ userSchema.pre('save', async function (next) {
         user.password = await bcrypt.hash(user.password, 8)
     }
 
-
     next()
 
 })
@@ -107,8 +104,6 @@ userSchema.pre('remove', async function (next) {
     next()
 })
 
-
-
 userSchema.methods.toJSON = function () {
     const user = this
     const userObject = user.toObject()
@@ -119,8 +114,6 @@ userSchema.methods.toJSON = function () {
     
     return userObject
 }
-// 
-
 
 const User = mongoose.model('User', userSchema)
 

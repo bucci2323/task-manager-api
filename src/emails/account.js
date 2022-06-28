@@ -9,7 +9,6 @@ const sendWelcomeEmail = (email, name) => {
         from: 'victormartins2035@gmail.com',
         subject: 'Thanks for joining in!',
         text: `Welcome to the app , ${name}. let me know how you get along with the app.`,
-
     })
 }
 
@@ -20,7 +19,6 @@ const sendCancelationEmail = (email, name) => {
         subject: 'Sorry to see you go ',
         text: ` Goodbye , ${name} I hope to see you some time soon!`
     })
-
 }
 
 module.exports = {
