@@ -16,7 +16,10 @@ router.post('/users', async (req, res) => {
     try {
         await user.save()
         sendWelcomeEmail(user.email, user.name)
-        const token = await user.generateAuthToken()
+    const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET)
+    user.tokens = user.tokens.concat({ token })
+    await user.save()
+
         res.status(201).send({ user, token })
     } catch (e) {
         console.log('err is ', e);
@@ -27,8 +30,25 @@ router.post('/users', async (req, res) => {
 
 router.post('/users/login', async (req, res) => {
     try {
-        const user = await User.findByCredentials(req.body.email, req.body.password)
-        const token = await user.generateAuthToken()
+
+        const user = await User.findOne({ email: req.body.email });
+
+        if (!user) {
+            throw new Error("Unable to login")
+        }
+        const isMatch = await bcrypt.compare(req.body.password, user.password)
+        if (!isMatch) {
+            throw new Error('Unable to login')
+        }
+
+
+
+    const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET)
+
+    user.tokens = user.tokens.concat({ token })
+    await user.save()
+
+
         res.send({ user, token })
     } catch (e) {
         console.log(e);
